@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className="scroll-smooth h-full"> 
+    <html lang="vi" data-scroll-behavior="smooth" className="scroll-smooth h-full"> 
       {/* Thay vì dùng variable, ta ốp thẳng class của font vào body */}
       <body
         className={`${jakarta.className} antialiased min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-blue-200 selection:text-blue-900`}

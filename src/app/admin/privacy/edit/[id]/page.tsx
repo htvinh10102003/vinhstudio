@@ -1,145 +1,81 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/src/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import 'react-quill-new/dist/quill.snow.css';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
-
-const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline'],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-    ['link'],
-    ['clean']
-  ],
-};
-const formats = ['header', 'bold', 'italic', 'underline', 'list', 'link'];
-
-export default function EditPrivacyPolicy({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
-
+export default function EditPrivacy() {
   const router = useRouter();
-  const [apps, setApps] = useState<any[]>([]);
+  const { id } = useParams(); // Lấy ID từ URL
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  
-  const [formData, setFormData] = useState({
-    app_id: '',
-    title: '',
-    slug: '',
-    content: ''
-  });
+  const [formData, setFormData] = useState({ app_name: '', content: '' });
 
+  // Lấy dữ liệu cũ
   useEffect(() => {
-    // Tải cả danh sách App và dữ liệu Policy cùng lúc
-    const loadData = async () => {
-      const [appsRes, policyRes] = await Promise.all([
-        supabase.from('apps').select('id, name'),
-        supabase.from('privacy_policies').select('*').eq('id', id).single()
-      ]);
-
-      if (appsRes.data) setApps(appsRes.data);
-      if (policyRes.data) {
-        setFormData(policyRes.data);
-      } else {
-        alert('Không tìm thấy chính sách!');
-        router.push('/admin/privacy');
-      }
+    const fetchDetail = async () => {
+      const { data } = await supabase.from('privacy_policies').select('*').eq('id', id).single();
+      if (data) setFormData({ app_name: data.app_name, content: data.content });
       setFetching(false);
     };
-    
-    loadData();
-  }, [id, router]);
-
-  const generateSlug = (text: string) => {
-    return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/^-+|-+$/g, ''); 
-  };
+    fetchDetail();
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    const { error } = await supabase
-      .from('privacy_policies')
-      .update({
-        ...formData,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id);
-
+    const { error } = await supabase.from('privacy_policies').update(formData).eq('id', id);
+    
     if (error) {
-      alert('Lỗi: ' + error.message);
+      alert("Lỗi: " + error.message);
       setLoading(false);
     } else {
-      router.push('/admin/privacy'); 
+      router.push('/admin/privacy');
+      router.refresh();
     }
   };
 
-  if (fetching) return <div className="p-8 text-center text-gray-500">Đang tải dữ liệu...</div>;
+  if (fetching) return <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto pb-24">
-      <Link href="/admin/privacy" className="text-gray-500 hover:text-blue-600 mb-6 inline-block">&larr; Quay lại</Link>
-      <h1 className="text-3xl font-bold mb-8 text-blue-600">Sửa Chính Sách Bảo Mật</h1>
+    <div className="p-8 md:p-12 max-w-4xl mx-auto">
+      <Link href="/admin/privacy" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6">
+        <ArrowLeft size={16} /> Quay lại
+      </Link>
+      
+      <h1 className="text-3xl font-extrabold text-slate-900 mb-8">Sửa chính sách</h1>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-6">
-        <div>
-          <label className="block font-medium mb-2 text-gray-700">Áp dụng cho Ứng dụng:</label>
-          <select 
-            value={formData.app_id}
-            onChange={(e) => setFormData({...formData, app_id: e.target.value})}
-            className="w-full border p-3 rounded outline-none"
-            required
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase tracking-widest text-slate-500 mb-2">Tên ứng dụng</label>
+            <input 
+              required 
+              className="w-full border-2 border-slate-100 bg-slate-50 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold"
+              value={formData.app_name}
+              onChange={(e) => setFormData({...formData, app_name: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase tracking-widest text-slate-500 mb-2">Nội dung chính sách (HTML)</label>
+            <textarea 
+              required 
+              rows={15}
+              className="w-full border-2 border-slate-100 bg-slate-50 p-4 rounded-2xl outline-none focus:border-blue-500 font-medium"
+              value={formData.content}
+              onChange={(e) => setFormData({...formData, content: e.target.value})}
+            />
+          </div>
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:bg-slate-300"
           >
-            <option value="" disabled>-- Chọn ứng dụng --</option>
-            {apps.map(app => (
-              <option key={app.id} value={app.id}>{app.name}</option>
-            ))}
-          </select>
+            <Save size={20} /> {loading ? 'Đang cập nhật...' : 'Cập nhật ngay'}
+          </button>
         </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block font-medium mb-2 text-gray-700">Tiêu đề</label>
-            <input 
-              type="text" required value={formData.title} 
-              onChange={(e) => setFormData({...formData, title: e.target.value, slug: generateSlug(e.target.value)})}
-              className="w-full border p-3 rounded outline-none"
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-2 text-gray-700">Đường dẫn (Slug)</label>
-            <input 
-              type="text" required value={formData.slug}
-              onChange={(e) => setFormData({...formData, slug: e.target.value})}
-              className="w-full border p-3 rounded bg-gray-50 outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="mb-12">
-          <label className="block font-medium mb-2 text-gray-700">Nội dung Chính sách</label>
-          <div className="h-96 mb-10">
-            <ReactQuill 
-              theme="snow" value={formData.content}
-              onChange={(content) => setFormData({...formData, content})}
-              modules={modules} formats={formats} className="h-full"
-            />
-          </div>
-        </div>
-
-        <button 
-          type="submit" disabled={loading || !formData.app_id}
-          className="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700 transition"
-        >
-          {loading ? 'Đang cập nhật...' : 'Cập nhật Chính Sách'}
-        </button>
       </form>
     </div>
   );
