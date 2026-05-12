@@ -12,8 +12,7 @@ export default function PrivacyAdmin() {
   // Lấy danh sách
   const fetchPolicies = async () => {
     setLoading(true);
-    const { data } = await supabase.from('privacy_policies').select('*').order('created_at', { ascending: false });
-    setPolicies(data || []);
+const { data } = await supabase.from('privacy_policies').select('*, apps(name)').order('created_at', { ascending: false });    setPolicies(data || []);
     setLoading(false);
   };
 
