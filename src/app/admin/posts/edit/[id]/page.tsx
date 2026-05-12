@@ -168,6 +168,7 @@ export default function EditPost({ params }: { params: Promise<{ id: string }> }
         <div>
           <label className="block font-bold mb-2 text-gray-700">Nội dung chi tiết</label>
           <div className="h-[500px] mb-12">
+            // @ts-ignore
             <ReactQuill 
               ref={quillRef}
               theme="snow"

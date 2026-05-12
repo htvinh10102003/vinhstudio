@@ -106,6 +106,7 @@ export default function CreatePost() {
         <div className="mb-12">
           <label className="block font-bold mb-2 text-gray-700">Nội dung chi tiết</label>
           <div className="h-[500px] mb-12">
+            //@ts-ignore
             <ReactQuill 
               ref={quillRef}
               theme="snow"
