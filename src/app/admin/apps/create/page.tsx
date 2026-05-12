@@ -6,7 +6,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 // Sử dụng Lucide icons cho đúng style Vinh Studio
 import { ArrowLeft, Save, LayoutGrid, Link as LinkIcon, Image as ImageIcon, FileText, Smartphone, Globe, Code } from 'lucide-react';
-
+const generateSlug = (text: string) => {
+  return text.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+};
 export default function CreateApp() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -34,43 +40,50 @@ export default function CreateApp() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name) return alert("Ông quên nhập tên dự án kìa!");
-    
-    setLoading(true);
+  e.preventDefault();
+  if (!formData.name) return alert("Ông quên nhập tên dự án kìa!");
+  
+  setLoading(true);
 
-    // 2. Xử lý logic biến chuỗi xuống dòng thành Mảng (Array) cho cột screenshots
-    const screenshotsArray = formData.screenshots
-      .split('\n')
-      .map(url => url.trim())
-      .filter(url => url !== '');
+  // 1. Tạo mảng Screenshots từ text
+  const screenshotsArray = formData.screenshots
+    .split('\n')
+    .map(url => url.trim())
+    .filter(url => url !== '');
 
-    const { error } = await supabase.from('apps').insert([{
-      name: formData.name,
-      project_type: formData.project_type,
-      version: formData.version,
-      testing_status: formData.testing_status,
-      short_description: formData.short_description,
-      full_description: formData.full_description,
-      icon_url: formData.icon_url,
-      video_url: formData.video_url,
-      screenshots: screenshotsArray, // Đẩy mảng vào cột TEXT[]
-      play_store_url: formData.play_store_url,
-      app_store_url: formData.app_store_url,
-      website_url: formData.website_url,
-      apk_download_url: formData.apk_download_url,
-      repository_url: formData.repository_url,
-      is_active: true, // Mặc định cho hiển thị luôn
-    }]);
+  // 2. TỰ ĐỘNG TẠO SLUG TỪ TÊN APP
+  const slug = generateSlug(formData.name);
 
-    if (error) {
-      alert('Lỗi rồi ông ơi: ' + error.message);
-      setLoading(false);
-    } else {
-      router.push('/admin/apps');
-      router.refresh();
-    }
-  };
+  // 3. Đẩy lên Supabase kèm theo SLUG
+  const { error } = await supabase.from('apps').insert([{
+    name: formData.name,
+    slug: slug, // <-- Thêm dòng này để hết lỗi NOT NULL
+    project_type: formData.project_type,
+    version: formData.version,
+    testing_status: formData.testing_status,
+    short_description: formData.short_description,
+    full_description: formData.full_description,
+    icon_url: formData.icon_url,
+    video_url: formData.video_url,
+    screenshots: screenshotsArray,
+    play_store_url: formData.play_store_url,
+    app_store_url: formData.app_store_url,
+    website_url: formData.website_url,
+    apk_download_url: formData.apk_download_url,
+    repository_url: formData.repository_url,
+    is_active: true,
+  }]);
+
+  if (error) {
+    alert('Lỗi rồi ông ơi: ' + error.message);
+    setLoading(false);
+  } else {
+    // Nếu ông muốn dùng Popup như bên Privacy thì thêm state popup vào đây
+    // Còn không thì chuyển hướng luôn như cũ
+    router.push('/admin/apps');
+    router.refresh();
+  }
+};
 
   return (
     <div className="p-8 md:p-12 max-w-5xl mx-auto font-sans bg-[#F8FAFC] min-h-screen">
