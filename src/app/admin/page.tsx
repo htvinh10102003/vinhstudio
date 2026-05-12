@@ -69,7 +69,7 @@ export default async function AdminDashboard() {
           </div>
           
           <div className="space-y-4">
-            {recentPosts?.map(post => (
+            {recentPosts?.map((post: any) => (
               <div key={post.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-5 bg-[#F8FAFC] rounded-[1.5rem] hover:bg-slate-50 transition-colors border border-slate-100">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-extrabold text-slate-900 truncate pr-4">{post.title}</h3>
