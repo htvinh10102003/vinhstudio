@@ -186,7 +186,7 @@ export default async function Home() {
           <div className="text-slate-900 font-extrabold text-xl tracking-tight">VINH.STUDIO</div>
           <div className="flex gap-6 text-sm font-bold text-slate-500">
             <Link href="mailto:contact.vinhstudio@gmail.com" className="hover:text-blue-600 transition-colors">Liên hệ</Link>
-            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Bảo mật</Link>
+            <Link href="/admin/privacy" className="hover:text-blue-600 transition-colors">Bảo mật</Link>
           </div>
         </div>
       </footer>

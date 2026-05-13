@@ -41,7 +41,7 @@ export default function PrivacyAdmin() {
           <h1 className="text-3xl font-extrabold text-slate-900">Chính sách bảo mật</h1>
           <p className="text-slate-500 font-medium">Quản lý nội dung pháp lý của Vinh Studio.</p>
         </div>
-        <Link href="/privacy/create" className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-extrabold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
+        <Link href="/admin/privacy/create" className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-extrabold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
           <PlusCircle size={18} /> Thêm mới
         </Link>
       </div>
@@ -76,7 +76,7 @@ export default function PrivacyAdmin() {
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/privacy/edit/${p.id}`} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                        <Link href={`/admin/privacy/edit/${p.id}`} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                           <Pencil size={18} />
                         </Link>
                         <button 

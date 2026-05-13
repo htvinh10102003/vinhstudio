@@ -118,7 +118,7 @@ export default function ProjectGrid({ apps }: { apps: any[] }) {
                     <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700">{selectedApp.project_type}</span>
                     <span>v{selectedApp.version}</span>
                     {selectedApp.privacy_policies?.[0]?.slug && (
-                      <Link href={`/privacy/${selectedApp.privacy_policies[0].slug}`} target="_blank" className="flex items-center gap-1 text-blue-600 hover:underline"><ShieldCheck size={14} /> Privacy</Link>
+                      <Link href={`/admin/privacy/${selectedApp.privacy_policies[0].slug}`} target="_blank" className="flex items-center gap-1 text-blue-600 hover:underline"><ShieldCheck size={14} /> Privacy</Link>
                     )}
                   </div>
                 </div>

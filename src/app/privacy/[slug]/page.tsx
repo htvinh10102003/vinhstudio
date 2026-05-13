@@ -11,9 +11,8 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
     .from('privacy_policies')
     .select('*, apps(name, icon_url)')
     .eq('slug', slug)
-    .single();
+    .maybeSingle();
 
-  // --- TRẠNG THÁI LỖI (DEBUG) ---
   if (error || !policy) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-50/30 flex items-start justify-center p-4 sm:p-8">
