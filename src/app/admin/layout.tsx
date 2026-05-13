@@ -14,7 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Tổng quan', href: '/admin', icon: LayoutDashboard },
     { name: 'Ứng dụng', href: '/admin/apps', icon: Smartphone },
     { name: 'Bài viết', href: '/admin/posts', icon: FileText },
-    { name: 'Chính sách', href: '/admin/privacy', icon: ShieldCheck },
+    { name: 'Chính sách', href: '/privacy', icon: ShieldCheck },
   ];
 
   const handleLogout = async () => {
