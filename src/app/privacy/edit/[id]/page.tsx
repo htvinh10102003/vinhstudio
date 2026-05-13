@@ -32,7 +32,7 @@ export default function EditPrivacy() {
       alert("Lỗi: " + error.message);
       setLoading(false);
     } else {
-      router.push('/admin/privacy');
+      router.push('/privacy');
       router.refresh();
     }
   };
@@ -41,7 +41,7 @@ export default function EditPrivacy() {
 
   return (
     <div className="p-8 md:p-12 max-w-4xl mx-auto">
-      <Link href="/admin/privacy" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6">
+      <Link href="/privacy" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6">
         <ArrowLeft size={16} /> Quay lại
       </Link>
       

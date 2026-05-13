@@ -59,7 +59,7 @@ export default function CreatePrivacy() {
     } else {
       setPopup({ show: true, type: 'success', message: 'Thêm chính sách ngon lành!' });
       setTimeout(() => {
-        router.push('/admin/privacy');
+        router.push('/privacy');
         router.refresh();
       }, 2000);
     }
@@ -67,7 +67,7 @@ export default function CreatePrivacy() {
 
   return (
     <div className="p-8 md:p-12 max-w-4xl mx-auto relative">
-      <Link href="/admin/privacy" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors">
+      <Link href="/privacy" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors">
         <ArrowLeft size={16} /> Quay lại danh sách
       </Link>
       
