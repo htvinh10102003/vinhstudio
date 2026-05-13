@@ -1,132 +1,125 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { supabase } from '@/src/lib/supabase';
 import Link from 'next/link';
-import { ShieldCheck, PlusCircle, Pencil, Trash2, Loader2, AlertTriangle, X } from 'lucide-react';
+// Import Icon mới
+import { Smartphone, FileText, ShieldCheck, PlusCircle, PenSquare, ArrowUpRight, CheckCircle2, Clock } from 'lucide-react';
 
-export default function PrivacyAdmin() {
-  const [policies, setPolicies] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  // State quản lý Popup xóa
-  const [deleteModal, setDeleteModal] = useState({ show: false, id: '', name: '' });
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const fetchPolicies = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('privacy_policies').select('*').order('created_at', { ascending: false });
-    setPolicies(data || []);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchPolicies(); }, []);
-
-  // Hàm thực thi xóa sau khi đã xác nhận qua Popup
-  const confirmDelete = async () => {
-    setIsDeleting(true);
-    const { error } = await supabase.from('privacy_policies').delete().eq('id', deleteModal.id);
-    
-    if (error) {
-      alert("Lỗi: " + error.message);
-    } else {
-      setPolicies(policies.filter(p => p.id !== deleteModal.id));
-      setDeleteModal({ show: false, id: '', name: '' }); // Đóng popup
-    }
-    setIsDeleting(false);
-  };
+export default async function AdminDashboard() {
+  const { count: appsCount } = await supabase.from('apps').select('*', { count: 'exact', head: true });
+  const { count: postsCount } = await supabase.from('posts').select('*', { count: 'exact', head: true });
+  const { count: privacyCount } = await supabase.from('privacy_policies').select('*', { count: 'exact', head: true });
+  const { data: recentPosts } = await supabase.from('posts').select('id, title, created_at, is_published, slug').order('created_at', { ascending: false }).limit(4);
 
   return (
-    <div className="p-8 md:p-12 max-w-5xl mx-auto relative">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Chính sách bảo mật</h1>
-          <p className="text-slate-500 font-medium">Quản lý nội dung pháp lý của Vinh Studio.</p>
-        </div>
-        {/* Nút thêm mới - Check kỹ đường dẫn này ông nhé */}
-        <Link href="/admin/privacy/create" className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-extrabold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
-          <PlusCircle size={18} /> Thêm mới
-        </Link>
+    <div className="p-8 md:p-12 max-w-6xl mx-auto">
+      <div className="mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Tổng quan hệ thống</h1>
+        <p className="text-slate-500 font-medium">Chào mừng trở lại! Dưới đây là tình trạng hiện tại của Vinh Studio.</p>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  <th className="px-8 py-5 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">Tên ứng dụng</th>
-                  <th className="px-8 py-5 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">Ngày tạo</th>
-                  <th className="px-8 py-5 text-[11px] font-extrabold uppercase tracking-widest text-slate-400 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {policies.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><ShieldCheck size={16} /></div>
-                        <span className="font-bold text-slate-900">{p.app_name}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5 text-slate-500 font-medium text-sm">
-                      {new Date(p.created_at).toLocaleDateString('vi-VN')}
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/admin/privacy/edit/${p.id}`} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                          <Pencil size={18} />
-                        </Link>
-                        {/* Bấm nút này để hiện Popup */}
-                        <button 
-                          onClick={() => setDeleteModal({ show: true, id: p.id, name: p.app_name })}
-                          className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* --- POPUP XÁC NHẬN XÓA --- */}
-      {deleteModal.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl transform animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 mx-auto mb-6 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
-              <AlertTriangle size={32} />
+      {/* --- CÁC THẺ THỐNG KÊ (METRICS CARDS) --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {/* Card 1 */}
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+              <Smartphone size={24} strokeWidth={2.5} />
             </div>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-slate-900 tracking-tight">{appsCount || 0}</p>
+            <p className="text-slate-500 font-bold text-sm mt-1">Dự án Ứng dụng</p>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+              <FileText size={24} strokeWidth={2.5} />
+            </div>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-slate-900 tracking-tight">{postsCount || 0}</p>
+            <p className="text-slate-500 font-bold text-sm mt-1">Bài viết Blog</p>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
+              <ShieldCheck size={24} strokeWidth={2.5} />
+            </div>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-slate-900 tracking-tight">{privacyCount || 0}</p>
+            <p className="text-slate-500 font-bold text-sm mt-1">Chính sách bảo mật</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* --- KHU VỰC BÀI VIẾT GẦN ĐÂY --- */}
+        <div className="xl:col-span-2 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-extrabold text-slate-900">Bài viết mới nhất</h2>
+            <Link href="/admin/posts" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+              Xem tất cả <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+          </div>
+          
+          <div className="space-y-4">
+            {recentPosts?.map((post: any) => (
+              <div key={post.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-5 bg-[#F8FAFC] rounded-[1.5rem] hover:bg-slate-50 transition-colors border border-slate-100">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-extrabold text-slate-900 truncate pr-4">{post.title}</h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-500 font-medium mt-1.5">
+                    <span className="flex items-center gap-1"><Clock size={12} /> {new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {post.is_published ? (
+                    <span className="flex items-center gap-1.5 bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest">
+                      <CheckCircle2 size={12} /> Đã xuất bản
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 bg-amber-100 text-amber-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest">
+                      <FileText size={12} /> Bản nháp
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- KHU VỰC TẠO NHANH (QUICK ACTIONS) --- */}
+        <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-xl shadow-slate-900/10 flex flex-col relative overflow-hidden">
+          {/* Gradient trang trí góc */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full"></div>
+          
+          <h2 className="text-2xl font-extrabold mb-3 relative z-10">Tạo mới</h2>
+          <p className="text-slate-400 font-medium text-sm mb-8 relative z-10 leading-relaxed">
+            Phím tắt giúp ông thao tác nhanh chóng với hệ thống.
+          </p>
+          
+          <div className="space-y-3 relative z-10 mt-auto">
+            <Link 
+              href="/admin/apps/create" 
+              className="w-full bg-white text-slate-900 px-6 py-4 rounded-2xl font-extrabold flex items-center justify-between hover:scale-[1.02] transition-transform"
+            >
+              <span className="flex items-center gap-3"><PlusCircle size={20} className="text-blue-600" /> Thêm Ứng dụng</span>
+            </Link>
             
-            <h3 className="text-xl font-extrabold text-slate-900 text-center mb-2">Xác nhận xóa?</h3>
-            <p className="text-slate-500 font-medium text-center mb-8 leading-relaxed">
-              Ông có chắc chắn muốn xóa chính sách của <span className="text-slate-900 font-bold">"{deleteModal.name}"</span> không? Hành động này không thể hoàn tác.
-            </p>
-
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setDeleteModal({ show: false, id: '', name: '' })}
-                className="flex-1 bg-slate-100 text-slate-900 py-4 rounded-2xl font-extrabold hover:bg-slate-200 transition-all"
-              >
-                Hủy
-              </button>
-              <button 
-                onClick={confirmDelete}
-                disabled={isDeleting}
-                className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-extrabold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 disabled:bg-red-300"
-              >
-                {isDeleting ? 'Đang xóa...' : 'Xóa ngay'}
-              </button>
-            </div>
+            <Link 
+              href="/admin/posts/create" 
+              className="w-full bg-slate-800 text-white border border-slate-700 px-6 py-4 rounded-2xl font-extrabold flex items-center justify-between hover:bg-slate-700 transition-colors"
+            >
+              <span className="flex items-center gap-3"><PenSquare size={20} className="text-emerald-400" /> Viết Blog</span>
+            </Link>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

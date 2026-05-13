@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { supabase } from '@/src/lib/supabase';
 import ProjectGrid from '@/src/components/ProjectGrid';
 
+export const revalidate = 0;
+
 // 1. Lấy dữ liệu Ứng dụng
 async function getApps() {
   const { data } = await supabase
