@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 // 1. Khởi tạo font Plus Jakarta Sans hỗ trợ tiếng Việt tuyệt đối
 const jakarta = Plus_Jakarta_Sans({
