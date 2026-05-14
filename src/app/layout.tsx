@@ -31,6 +31,7 @@ export default function RootLayout({
         className={`${jakarta.className} antialiased min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-blue-200 selection:text-blue-900`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
